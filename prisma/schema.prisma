@@ -1,0 +1,86 @@
+
+generator client {
+  provider = "prisma-client-js"
+  
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+
+model User {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  name       String?
+  email      String   @unique
+  image      String?
+  isVerified Boolean  @default(false)
+  onBoard    Boolean  @default(false)
+  posts      Post[]
+  comments   Comment[]
+  likes      Like[]  
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  country    String?
+  city       String?
+  location   String?
+}
+
+model Post {
+  id            String         @id @default(auto()) @map("_id") @db.ObjectId
+  title         String
+  content       String
+  image         String?
+  author        User           @relation(fields: [authorId], references: [id])
+  authorId      String         @db.ObjectId
+  comments      Comment[]
+  likes         Like[]
+  topics        PostTopic[]   
+  totalLikes    Int            @default(0)
+  totalComments Int            @default(0)
+  totalViews    Int            @default(0)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model Comment {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  content   String
+  image     String?
+  author    User      @relation(fields: [authorId], references: [id])
+  authorId  String    @db.ObjectId
+  post      Post      @relation(fields: [postId], references: [id])
+  postId    String    @db.ObjectId
+  parent    Comment?  @relation("CommentToComment", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  parentId  String?   @db.ObjectId
+  replies   Comment[] @relation("CommentToComment")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Like {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  String   @db.ObjectId
+  post      Post     @relation(fields: [postId], references: [id])
+  postId    String   @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Topic {
+  id        String      @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  posts     PostTopic[] 
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}
+
+model PostTopic {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  post    Post   @relation(fields: [postId], references: [id])
+  postId  String @db.ObjectId
+  topic   Topic  @relation(fields: [topicId], references: [id])
+  topicId String @db.ObjectId
+}
