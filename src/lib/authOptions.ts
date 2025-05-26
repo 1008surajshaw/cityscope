@@ -2,6 +2,7 @@
 import prisma from '@/lib/prisma';
 import { NextAuthOptions } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
+import CredentialsProvider from 'next-auth/providers/credentials';
 
 const AUTH_TOKEN_EXPIRATION_TIME = 30 * 24 * 60 * 60; // 30 days
 
@@ -11,7 +12,54 @@ export const authOptions = {
       clientId: process.env.GOOGLE_CLIENT_ID as string,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
     }),
-    
+    CredentialsProvider({
+      name: "Test Credentials",
+      credentials: {
+        email: { label: "Email", type: "email" }
+      },
+      async authorize(credentials) {
+        if (!credentials?.email) {
+          return null;
+        }
+        
+        // Only allow specific test email
+        if (credentials.email === "john@example.com") {
+          // Fetch the test user from the database
+          const user = await prisma.user.findFirst({
+            where: {
+              email: "john@example.com"
+            },
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              image: true,
+              isVerified: true,
+              onBoard: true,
+              city: true,
+              country: true,
+              location: true,
+            }
+          });
+          
+          if (user) {
+            return {
+              id: user.id,
+              name: user.name || undefined,
+              email: user.email,
+              image: user.image || undefined,
+              isVerified: user.isVerified,
+              onBoard: user.onBoard,
+              city: user.city || undefined,
+              country: user.country || undefined,
+              location: user.location || undefined,
+            };
+          }
+        }
+        
+        return null;
+      }
+    }),
   ],
   callbacks: {
 

@@ -6,11 +6,14 @@ import { getServerSession } from "next-auth"
 import { GoogleOauthButton } from "@/components/common/social-auth"
 import { PostFeedSkeleton } from "@/components/skeletons/PostFeedSkeleton"
 import { OnboardingPage } from "@/components/auth/onboarding-form"
+import { TestLoginForm } from "@/components/auth/test-login-form"
+import { authOptions } from "@/lib/authOptions"
 
 export default async function HomePage() {
   console.log("HomePage rendering...")
 
-  const session = await getServerSession()
+  const session = await getServerSession(authOptions)
+  console.log(session, "session in the page.tsx")
 
   if (!session) {
     return (
@@ -18,6 +21,9 @@ export default async function HomePage() {
         <h1 className="mb-6 text-3xl font-bold">Welcome to CityScope</h1>
         <div className="w-full max-w-sm">
           <GoogleOauthButton label="Sign in with Google" />
+          <div>
+            <TestLoginForm/>
+          </div>
         </div>
       </div>
     )
@@ -27,7 +33,7 @@ export default async function HomePage() {
     <MainLayout>
       <div className="space-y-4">
       <div className="border p-2">
-        {session &&session.user && session.user?.onBoard == false && <OnboardingPage />}
+        {session && session.user && session.user?.onBoard == false && <OnboardingPage />}
         <CreatePost />
       </div>
         <Suspense fallback={<PostFeedSkeleton />}>
