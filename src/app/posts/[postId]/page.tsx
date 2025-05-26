@@ -11,9 +11,9 @@ import { PostByIdSchemaType } from "@/validators/post.validators";
 
 
 
-const page = async ({ params }: {params: PostByIdSchemaType} )  => {
+const page = async ({ params }: {params:Promise<PostByIdSchemaType>} )  => {
 
-  const postId = params.postId;
+  const {postId} = await params;
   const post = await getPost(postId);
   
   if (!post) {
