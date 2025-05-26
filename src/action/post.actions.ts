@@ -355,7 +355,7 @@ export const getPostComments = async (postId: string) => {
     const comments = await prisma.comment.findMany({
       where: {
         postId,
-        parentId: null, // Get only top-level comments
+        parentId: null, 
       },
       include: {
         author: {
@@ -399,3 +399,38 @@ export const getPostComments = async (postId: string) => {
     };
   }
 };
+
+
+export   async function getPost(postId: string) {
+  const post = await prisma.post.findUnique({
+    where: { id: postId },
+    select: {
+      id: true,
+      title: true,
+      content: true,
+      image: true,
+      createdAt: true,
+      author: {
+        select: {
+          id: true,
+          name: true,
+          image: true,
+        },
+      },
+      totalLikes: true,
+      totalComments: true,
+    },
+  });
+
+  if (!post) return null;
+
+  return {
+    ...post,
+    image: post.image || undefined,
+    author: {
+      ...post.author,
+      image: post.author.image || undefined,
+      name: post.author.name || '',
+    },
+  };
+}

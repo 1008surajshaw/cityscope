@@ -10,3 +10,9 @@ export const PostSchema = z.object({
 export type PostSchemaType = z.infer<typeof PostSchema>;
 
 
+export const PostByIdSchema = z.object({
+    postId: z.string().min(1, 'Post id is required'),
+  });
+  
+  export type PostByIdSchemaType = z.infer<typeof PostByIdSchema>;
+  

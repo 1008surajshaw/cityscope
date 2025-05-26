@@ -64,7 +64,6 @@ export function InteractivePostCard({
         url: `${window.location.origin}/posts/${postId}`,
       })
     } catch (error) {
-      // Fallback to clipboard
       navigator.clipboard.writeText(`${window.location.origin}/posts/${postId}`)
       toast.success("Link copied to clipboard")
     }

@@ -3,47 +3,16 @@ import { notFound } from "next/navigation";
 import MainLayout from "@/layouts/main-layout";
 import { PostCard } from "@/components/post/post-card";
 import { CommentSection } from "@/components/post/comment-section";
-import prisma from "@/lib/prisma";
-import { getPostComments } from "@/action/post.actions";
+import { getPost, getPostComments } from "@/action/post.actions";
 import { GetLikedPostID, GetCommentedPostID } from "@/action/post.actions";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
+import { PostByIdSchemaType } from "@/validators/post.validators";
 
-async function getPost(postId: string) {
-  const post = await prisma.post.findUnique({
-    where: { id: postId },
-    select: {
-      id: true,
-      title: true,
-      content: true,
-      image: true,
-      createdAt: true,
-      author: {
-        select: {
-          id: true,
-          name: true,
-          image: true,
-        },
-      },
-      totalLikes: true,
-      totalComments: true,
-    },
-  });
 
-  if (!post) return null;
 
-  return {
-    ...post,
-    image: post.image || undefined,
-    author: {
-      ...post.author,
-      image: post.author.image || undefined,
-      name: post.author.name || '',
-    },
-  };
-}
+const page = async ({ params }: {params: PostByIdSchemaType} )  => {
 
-export default async function PostPage({ params }: { params: { postId: string } }) {
   const postId = params.postId;
   const post = await getPost(postId);
   
@@ -84,3 +53,5 @@ export default async function PostPage({ params }: { params: { postId: string } 
     </MainLayout>
   );
 }
+
+export default page;
